@@ -1,0 +1,22 @@
+{{- if and (eq .Values.ingress_enabled "true") (eq .Values.anm.enabled true) }}  
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: anm
+  namespace: {{ .Values.run.id }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: "1"
+    nginx.ingress.kubernetes.io/ssl-redirect: "0"
+spec:
+  tls:
+  - hosts:
+    - anm.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+  rules:
+  - host: anm.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+    http:
+      paths: 
+      - backend:
+          serviceName: anm
+          servicePort: 8090
+{{- end }}
+

@@ -1,0 +1,19 @@
+{{- if eq .Values.ccbackend.enabled true }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.apigw.service: cc-backend
+  name: cc-backend
+  namespace: {{ .Values.run.id }}
+spec:
+  clusterIP: None
+  ports:
+  - port: {{ .Values.ccbackend.trafficPort }}
+    targetPort: {{ .Values.ccbackend.trafficPort }}
+    protocol: TCP
+  selector:
+    io.apigw.service: cc-backend
+  sessionAffinity: ClientIP
+  type: ClusterIP
+{{- end }}

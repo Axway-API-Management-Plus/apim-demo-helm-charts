@@ -1,0 +1,21 @@
+{{- if and (eq .Values.ingress_enabled "true") (eq .Values.apimgr.enabled true) }}   
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: apimgr{{ .Values.apimgr.testPort }}
+  namespace: {{ .Values.run.id }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: "0"
+    nginx.ingress.kubernetes.io/ssl-redirect: "0"
+spec:
+  tls:
+  - hosts:
+    - apimgr{{ .Values.apimgr.testPort }}.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+  rules:
+  - host: apimgr{{ .Values.apimgr.testPort }}.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+    http:
+      paths: 
+      - backend:
+          serviceName: apimgr
+          servicePort: {{ .Values.apimgr.testPort }}
+{{- end }}

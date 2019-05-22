@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    apigw.version: 1.7.0 (767ab4b)
+  creationTimestamp: null
+  labels:
+    io.apigw.service: mysql
+  name: mysql
+  namespace: {{ .Values.run.id }}
+spec:
+  replicas: {{ .Values.mysql.replicaCount }}
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.apigw.service: mysql
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imageCredentials.name }}
+      containers:
+      - env:
+        - name: MYSQL_DATABASE
+          value: Axway
+        - name: MYSQL_ROOT_PASSWORD
+          value: changeme
+        image: {{ .Values.dockerRegistry }}/{{ .Values.awsRegPrefix }}{{ .Values.mysql.imageName }}:{{ .Values.mysql.buildTag }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        name: mysql
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        resources: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30

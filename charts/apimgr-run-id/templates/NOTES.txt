@@ -1,0 +1,51 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+   Admin Node Manager
+   -----------------------
+   To Connect to API Gateway Admin Node Manager use the following URL
+   https://anm.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+
+   Default credential for Admin Node Manager:
+   user: admin
+   password: changeme
+
+   API Manager - Management
+   -----------------------
+   To Connect to API Manager use the following URL
+   https://apimgmt.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+
+   Default credential for API Manager Console
+   user: apiadmin
+   password: changeme
+
+
+   API Manager - Traffic
+   -----------------------
+   Test the Healthcheck on API Mgr
+
+   curl -k https://apimgr.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io/healthcheck
+   ** You need to add a Healthcheck to your API Mgr Traffic port for the above to work.
+
+   
+   Nginx Backend
+   ---------------
+   URL: https://cc-backend.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+   Test: curl -k https://cc-backend.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+
+   MySQL Database
+   -----------------
+   mysql
+
+
+{{- if and (ne .Values.cloud "local") (eq .Values.cassandraLocation "off-cluster") }}   
+   Cassandra Hosts
+   ------------------
+   cassandra-0: {{ .Values.cassandra.host0 }}
+   cassandra-1: {{ .Values.cassandra.host1 }}
+   cassandra-2: {{ .Values.cassandra.host2 }}
+   Cassandra Credentials: cassandra/cassandra
+{{- end }}
+
+

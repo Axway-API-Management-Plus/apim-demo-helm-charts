@@ -1,0 +1,79 @@
+{{- if eq .Values.apimgmt.enabled true }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: 2018-01-25T12:19:17Z
+  generation: 1
+  labels:
+    io.apigw.service: apimgmt
+  name: apimgmt
+  namespace: {{ .Values.run.id }}
+  resourceVersion: "6550"
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/apimgmt
+  uid: f6914d93-01c9-11e8-8658-080027de9f60
+spec:
+  replicas: {{ .Values.apimgmt.replicaCount }}
+  selector:
+    matchLabels:
+      io.apigw.service: apimgmt
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.apigw.service: apimgmt
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imageCredentials.name }}
+      containers:
+      - env:
+        - name: CASS_HOSTS
+          value: cassandra
+        - name: EMT_ANM_HOSTS
+          value: anm:8090
+        - name: EMT_TOPOLOGY_TTL
+          value: "10"
+        - name: METRICS_DB_URL
+          value: jdbc:mysql://mysql:3306/Axway
+        - name: METRICS_DB_USERNAME
+          value: root
+        - name: METRICS_DB_PASS
+          value: changeme
+        - name: KEYSPACE
+          value: {{ .Values.run.id }}
+        image: {{ .Values.dockerRegistry }}/{{ .Values.awsRegPrefix }}{{ .Values.apimgmt.imageName }}:{{ .Values.apimgmt.buildTag }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        name: apimgmt
+        ports:
+        - containerPort: 8075
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      initContainers:
+{{- if eq .Values.cassandraLocation "on-cluster" }}
+      - name: init-cassandra-int
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v cassandra 9042; do echo waiting for cassandra; sleep 60; done;']
+{{- end }}
+{{- if eq .Values.cassandraLocation "off-cluster" }}
+      - name: init-cassandra
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v cassandra 9042; do echo waiting for cassandra-0; sleep 2; done;']
+{{- end }}
+      - name: init-mysql
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v  mysql 3306; do echo waiting for mysql; sleep 2; done;']
+      - name: init-anm
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v anm 8090; do echo waiting for anm; sleep 2; done;']
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      terminationGracePeriodSeconds: 30
+{{- end }}

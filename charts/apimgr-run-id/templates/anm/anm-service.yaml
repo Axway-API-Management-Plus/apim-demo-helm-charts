@@ -1,0 +1,22 @@
+{{- if eq .Values.anm.enabled true }}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  creationTimestamp: null
+  labels:
+    io.apigw.service: anm
+  name: anm
+  namespace: {{ .Values.run.id }}
+spec:
+  clusterIP: None
+  ports:
+  - port: {{ .Values.anm.trafficPort }}
+    targetPort: {{ .Values.anm.trafficPort }}
+    protocol: TCP
+    name: anm
+  selector:
+    io.apigw.service: anm
+  sessionAffinity: ClientIP
+  type: ClusterIP
+{{- end }}

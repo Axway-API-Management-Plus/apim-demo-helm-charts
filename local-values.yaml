@@ -1,0 +1,72 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+dockerRegistry: <your registry host>
+
+cloud: "local"
+
+ingress:
+   host: 
+
+apisImport: "false"
+ingress_enabled: "true"
+
+# minikube, AWS, esx
+platform: "minikube"
+
+anm:
+   enabled: true
+   buildTag: "7.7-01"
+   imageName: "apim-demo/anm-demo"
+   replicaCount: 1
+   trafficPort: 8090
+
+apimgmt:
+   enabled: true
+   buildTag: "7.7-01"
+   imageName: "apim-demo/apimgt-demo"
+   replicaCount: 1
+   trafficPort: 8075
+
+apimgr:
+   enabled: true
+   buildTag: "7.7-01"
+   imageName: "apim-demo/apimgt-demo"
+   trafficPort: 8065
+   healthPort: 8080
+   testPort: 8081
+   replicaCount: 1
+
+mysql:
+   enabled: true
+   imageName: "demo/mysql-axway"
+   buildTag: "latest"
+   replicaCount: 1
+   databaseName: "Axway"
+   hostname: "mysql"
+   password: "changeme"
+   port: 3306
+
+ccbackend:
+   enabled: true
+   imageName: "demo/cc-backend"
+   buildTag: "k8s"
+   replicaCount: 1
+   trafficPort: 8443
+
+cassandraLocation: "off-cluster"
+cassandra:
+   enabled: true
+   host0: 
+
+pullPolicy: IfNotPresent
+
+# credentials for the registry. You can copy the password from your ~/.docker.config.json file (or your keychain)
+# the secret will be created with the _name_ property below
+imageCredentials:
+  name: regsecret
+  registry: <your registry host>
+  # username is the username for the registry auth. Should be empty in the chart values.yaml file, and set in an override file or on the command line
+  username: 
+  # password is the password for the registry auth. Should be empty in the chart values.yaml file, and set in an override file or on the command line
+  password: 

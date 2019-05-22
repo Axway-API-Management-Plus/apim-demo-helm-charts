@@ -1,0 +1,21 @@
+{{- if eq .Values.ccbackend.enabled true }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: cc-backend
+  namespace: {{ .Values.run.id }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: "1"
+    nginx.ingress.kubernetes.io/ssl-redirect: "0"
+spec:
+  tls:
+  - hosts:
+    - cc-backend.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+  rules:
+  - host: cc-backend.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+    http:
+      paths: 
+      - backend:
+          serviceName: cc-backend
+          servicePort: 8443
+{{- end }}

@@ -1,0 +1,105 @@
+{{- if eq .Values.apimgr.enabled true }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    apigw.version: 1.7.0 (767ab4b)
+  creationTimestamp: 2018-01-25T12:19:17Z
+  generation: 1
+  labels:
+    io.apigw.service: apimgr
+  name: apimgr
+  namespace: {{ .Values.run.id }}
+  resourceVersion: "6550"
+  selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/apimgr
+  uid: f6914d93-01c9-11e8-8658-080027de9f60
+spec:
+  replicas: {{ .Values.apimgr.replicaCount }}
+  selector:
+    matchLabels:
+      io.apigw.service: apimgr
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.apigw.service: apimgr
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imageCredentials.name }}
+      containers:
+      - args:
+        - /opt/Axway/apigateway/posix/bin/start-emt-instance
+        env:
+        - name: CASS_HOSTS
+          value: cassandra
+        - name: EMT_ANM_HOSTS
+          value: anm:8090
+        - name: EMT_TOPOLOGY_TTL
+          value: "10"
+        - name: METRICS_DB_URL
+          value: jdbc:mysql://mysql:3306/Axway
+        - name: METRICS_DB_USERNAME
+          value: root
+        - name: METRICS_DB_PASS
+          value: changeme
+        - name: KEYSPACE
+          value: {{ .Values.run.id }}
+        image: {{ .Values.dockerRegistry }}/{{ .Values.awsRegPrefix }}{{ .Values.apimgr.imageName }}:{{ .Values.apimgmt.buildTag }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        name: apimgr
+        ports:
+        - containerPort: 8065
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8081
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 8080
+          periodSeconds: 5
+          successThreshold: 1
+          failureThreshold: 2
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/bash", "-c", "sleep 10"]
+      initContainers:
+{{- if eq .Values.cassandraLocation "on-cluster" }}
+      - name: init-cassandra-int
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v cassandra 9042; do echo waiting for cassandra; sleep 60; done;']
+{{- end }}
+{{- if eq .Values.cassandraLocation "off-cluster" }}
+      - name: init-cassandra
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v cassandra 9042; do echo waiting for cassandra; sleep 2; done;']
+{{- end }}
+      - name: init-mysql
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v mysql 3306; do echo waiting for mysql; sleep 2; done;']
+      - name: init-anm
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v anm 8090; do echo waiting for anm; sleep 2; done;']
+      - name: init-apimgmt
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v apimgmt 8075; do echo waiting for apimgmt; sleep 2; done;']
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      terminationGracePeriodSeconds: 30
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+{{- end }}

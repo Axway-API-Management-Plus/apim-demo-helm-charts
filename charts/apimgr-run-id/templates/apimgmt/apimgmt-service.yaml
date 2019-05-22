@@ -1,0 +1,21 @@
+{{- if eq .Values.apimgmt.enabled true }} 
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  creationTimestamp: null
+  labels:
+    io.apigw.service: apimgmt
+  name: apimgmt
+  namespace: {{ .Values.run.id }}
+spec:
+  clusterIP: None
+  ports:
+  - port: {{ .Values.apimgmt.trafficPort }}
+    targetPort: {{ .Values.apimgmt.trafficPort }}
+    protocol: TCP
+  selector:
+    io.apigw.service: apimgmt
+  sessionAffinity: ClientIP
+  type: ClusterIP
+{{- end }}

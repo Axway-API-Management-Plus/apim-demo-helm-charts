@@ -1,0 +1,30 @@
+{{- if eq .Values.apimgr.enabled true }}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  creationTimestamp: null
+  labels:
+    io.apigw.service: apimgr
+  name: apimgr
+  namespace: {{ .Values.run.id }}
+spec:
+  clusterIP: None
+  ports:
+  - port: {{ .Values.apimgr.trafficPort }}
+    targetPort: {{ .Values.apimgr.trafficPort }}
+    protocol: TCP
+    name: port{{ .Values.apimgr.trafficPort }}
+  - port: {{ .Values.apimgr.testPort }}
+    targetPort: {{ .Values.apimgr.testPort }}
+    protocol: TCP
+    name: port{{ .Values.apimgr.testPort }}
+  - port: {{ .Values.apimgr.healthPort }}
+    targetPort: {{ .Values.apimgr.healthPort }}
+    protocol: TCP
+    name: port{{ .Values.apimgr.healthPort }}
+  selector:
+    io.apigw.service: apimgr
+  sessionAffinity: ClientIP
+  type: ClusterIP
+{{- end }}

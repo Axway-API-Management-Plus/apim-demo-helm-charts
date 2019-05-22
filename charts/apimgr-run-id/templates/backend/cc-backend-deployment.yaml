@@ -1,0 +1,39 @@
+{{- if eq .Values.ccbackend.enabled true }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    apigw.label: none
+  creationTimestamp: null
+  labels:
+    io.apigw.service: cc-backend
+  name: cc-backend
+  namespace: {{ .Values.run.id }}
+spec:
+  replicas: {{ .Values.ccbackend.replicaCount }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.apigw.service: cc-backend
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imageCredentials.name }}
+      nodeSelector:
+         dedicated: master
+      containers:
+      - name: cc-backend
+        image: {{ .Values.dockerRegistry }}/{{ .Values.awsRegPrefix }}{{ .Values.ccbackend.imageName }}:{{ .Values.ccbackend.buildTag }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        ports:
+        - containerPort: 8443
+          name: https-port
+        - containerPort: 8880
+          name: http-port
+        resources: {}
+        volumeMounts:
+      restartPolicy: Always
+      volumes:
+{{- end }}

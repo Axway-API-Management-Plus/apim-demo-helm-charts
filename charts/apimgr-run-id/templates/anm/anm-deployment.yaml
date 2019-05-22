@@ -1,0 +1,56 @@
+{{- if eq .Values.anm.enabled true }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    apigw.version: 1.7.0 (767ab4b)
+  creationTimestamp: null
+  labels:
+    io.apigw.service: anm
+  name: anm
+  namespace: {{ .Values.run.id }}
+spec:
+  replicas: {{ .Values.anm.replicaCount }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.apigw.service: anm
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imageCredentials.name }}
+      containers:
+      - name: anm
+        image: {{ .Values.dockerRegistry }}/{{ .Values.awsRegPrefix }}{{ .Values.anm.imageName }}:{{ .Values.anm.buildTag }}
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        env:
+        - name: CASS_HOSTS
+          value: cassandra
+        - name: METRICS_DB_URL
+          value: jdbc:mysql://mysql:3306/Axway?useSSL=false
+        - name: METRICS_DB_USERNAME
+          value: root
+        - name: METRICS_DB_PASS
+          value: changeme
+        - name: KEYSPACE
+          value: {{ .Values.run.id }}
+        args:
+          - /opt/Axway/apigateway/posix/bin/start-emt-nodemanager
+        ports:
+        - containerPort: 8090
+          protocol: TCP
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        resources: {}
+      initContainers:
+      - name: init-mysql
+        image: busybox
+        command: ['sh', '-c', 'until nc -w 3 -v mysql 3306; do echo waiting for mysql; sleep 2; done;']
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+{{- end }}

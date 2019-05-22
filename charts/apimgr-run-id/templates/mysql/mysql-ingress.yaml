@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: mysql
+  namespace: {{ .Values.run.id }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: "1"
+    nginx.ingress.kubernetes.io/ssl-redirect: "0"
+spec:
+  tls:
+  - hosts:
+    - mysql.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+  rules:
+  - host: mysql.{{ .Values.run.id }}.{{ .Values.ingress.host }}.nip.io
+    http:
+      paths: 
+      - backend:
+          serviceName: mysql
+          servicePort: 3306
