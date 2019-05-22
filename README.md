@@ -8,6 +8,8 @@ These charts are provided as an example for deploying Axway API Management solut
 
 Prerequisites:
 
+- These charts have been tested with Axway API Management v7.6.2 and v7.7
+
 - Knowledge of Kubernetes
 
 - You have Axway API Management docker images in a Docker registry (protected by user ID/password)
