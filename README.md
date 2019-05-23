@@ -12,7 +12,7 @@ Prerequisites and expectations:
 
 - You are expected to have a knowledge of Kubernetes
 
-- You have a Kubernetes cluster with Helm installed. 
+- You have a Kubernetes cluster with Helm installed 
 
 - You have Docker images of Axway API Management, MySQL (*mysql* in local-values.yaml) and an ingress controller (*ccbackend* in local-values.yaml) in a Docker registry (protected by user ID/password)
 
@@ -26,7 +26,7 @@ These are general steps for using these charts:
 
 2. Modify *local-values.yaml* with your Docker registry host, docker images names and tags, etc.
 
-3. Run the *deploy_charts.sh* script to deploy these charts
+3. Run the *deploy_charts.sh* script to deploy these charts; the command will prompt you for your Docker registry ID and password.
 
 ### Helm status of a deployed app
 
