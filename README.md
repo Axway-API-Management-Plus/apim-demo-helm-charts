@@ -1,4 +1,6 @@
-# Demo HELM charts for Axway API Management v7.7
+
+
+# This repo has been archived. You can find the latest Helm chart example [here](https://github.com/Axway/apigw-helm-charts)
 
 These charts are provided as an example for deploying Axway API Management solution in Docker containers in Kubernetes.
 
